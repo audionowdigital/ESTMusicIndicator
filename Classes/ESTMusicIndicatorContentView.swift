@@ -27,17 +27,17 @@ import UIKit
 
 class ESTMusicIndicatorContentView: UIView {
     
-    private let kBarCount = 3
-    private let kBarWidth:CGFloat = 3.0
-    private let kBarIdleHeight:CGFloat = 3.0
+    private let kBarCount = 4
+    private let kBarWidth:CGFloat = 6.0
+    private let kBarIdleHeight:CGFloat = 6.0
     private let kHorizontalBarSpacing:CGFloat = 2.0 // Measured on iPad 2 (non-Retina)
     private let kRetinaHorizontalBarSpacing:CGFloat = 1.5 // Measured on iPhone 5s (Retina)
-    private let kBarMinPeakHeight:CGFloat = 6.0
-    private let kBarMaxPeakHeight:CGFloat = 12.0
+    private let kBarMinPeakHeight:CGFloat = 12.0
+    private let kBarMaxPeakHeight:CGFloat = 24.0
     private let kMinBaseOscillationPeriod = CFTimeInterval(0.6)
     private let kMaxBaseOscillationPeriod = CFTimeInterval(0.8)
     private let kOscillationAnimationKey:String = "oscillation"
-    private let kDecayDuration = CFTimeInterval(0.3)
+    private let kDecayDuration = CFTimeInterval(0.4)
     private let kDecayAnimationKey:String = "decay"
     
     var barLayers = [CALayer]()
@@ -62,8 +62,8 @@ class ESTMusicIndicatorContentView: UIView {
     private func prepareBarLayers() {
         var xOffset:CGFloat = 0.0
         
-        for i in 1...kBarCount {
-            let newLayer = createBarLayerWithXOffset(xOffset, layerIndex: i)
+        for _ in 1...kBarCount {
+            let newLayer = createBarLayerWithXOffset(xOffset, layerIndex: 1)
             barLayers.append(newLayer)
             layer.addSublayer(newLayer)
             xOffset = newLayer.frame.maxX + horizontalBarSpacing()
@@ -135,6 +135,7 @@ class ESTMusicIndicatorContentView: UIView {
     
     func stopOscillation() {
         for layer in barLayers {
+            layer.bounds = layer.presentation()?.bounds ?? layer.bounds
             layer.removeAnimation(forKey: kOscillationAnimationKey)
         }
     }
@@ -149,6 +150,7 @@ class ESTMusicIndicatorContentView: UIView {
     
     func startDecay() {
         for layer in barLayers {
+            layer.bounds.size.height = self.kBarMaxPeakHeight / CGFloat(self.kBarCount)
             startDecayingBarLayer(layer)
         }
     }
@@ -183,10 +185,12 @@ class ESTMusicIndicatorContentView: UIView {
     private func startDecayingBarLayer(_ layer: CALayer) {
         let animation: CABasicAnimation = CABasicAnimation(keyPath: "bounds")
         
-        if let presentation = layer.presentation() {
-            animation.fromValue = NSValue(cgRect:CALayer(layer: presentation).bounds)
-        }
-        animation.toValue = NSValue(cgRect:layer.bounds)
+        var toBounds: CGRect = layer.bounds
+        toBounds.size.height = kBarMaxPeakHeight / CGFloat(kBarCount)
+        
+        animation.beginTime = CACurrentMediaTime() + 2.0
+        animation.fromValue = NSValue(cgRect:layer.bounds)
+        animation.toValue = NSValue(cgRect:toBounds)
         animation.duration = kDecayDuration
         animation.timingFunction = CAMediaTimingFunction.init(name: kCAMediaTimingFunctionEaseOut)
         
