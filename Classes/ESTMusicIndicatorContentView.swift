@@ -178,6 +178,7 @@ class ESTMusicIndicatorContentView: UIView {
         animation.autoreverses = true
         animation.duration = TimeInterval((CGFloat(basePeriod) / 2) * (kBarMaxPeakHeight / peakHeight))
         animation.timingFunction = CAMediaTimingFunction.init(name: kCAMediaTimingFunctionEaseIn)
+        animation.isRemovedOnCompletion = false
         
         layer.add(animation, forKey: kOscillationAnimationKey)
     }
@@ -193,6 +194,7 @@ class ESTMusicIndicatorContentView: UIView {
         animation.toValue = NSValue(cgRect:toBounds)
         animation.duration = kDecayDuration
         animation.timingFunction = CAMediaTimingFunction.init(name: kCAMediaTimingFunctionEaseOut)
+        animation.isRemovedOnCompletion = false
         
         layer.add(animation, forKey: kDecayAnimationKey)
     }
